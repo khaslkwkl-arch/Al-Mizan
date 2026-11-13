@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>الميزان</title>
+<link rel="manifest" href="mizan-manifest.json">
+<meta name="theme-color" content="#0d4a4f">
+<link rel="icon" href="mizan-192.png">
+<link rel="apple-touch-icon" href="mizan-192.png">
+<style>
+:root{--bg:#f2f6f5;--card:#fff;--ink:#14282a;--mut:#5a6e70;--line:#d9e3e2;--deep:#0d4a4f;--acc:#0d4a4f;--gold:#8a6310;--gbg:#f6ecd2;--fs:1.25rem}
+@media(prefers-color-scheme:dark){:root{--bg:#0e1819;--card:#16272a;--ink:#e8f0ef;--mut:#9db2b3;--line:#27403f;--acc:#7fd1c7;--gold:#e3b858;--gbg:#2d2a1b}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);font:1rem/1.7 system-ui,"Segoe UI",Tahoma,sans-serif;padding:env(safe-area-inset-top) 0 96px}
+main{max-width:560px;margin:0 auto;padding:14px}
+.hero{background:var(--deep);color:#fff;border-radius:22px;padding:22px 20px;text-align:center}
+.city,.lb,.tm{opacity:.82}.lb{margin-top:8px}
+.nm{font-size:2rem;font-weight:700;line-height:1.3}
+.cd{font-size:2.9rem;font-weight:300;letter-spacing:.04em;font-variant-numeric:tabular-nums;direction:ltr}
+.rows{list-style:none;margin:14px 0 0;padding:0;background:var(--card);border-radius:18px;overflow:hidden}
+.rows li{display:flex;justify-content:space-between;padding:15px 18px;border-bottom:1px solid var(--line);font-size:1.1rem}
+.rows li:last-child{border:0}.rows .sr{color:var(--mut);font-size:1rem}
+.rows .cur{background:var(--gbg);color:var(--gold);font-weight:700}
+.foot,.hint{color:var(--mut);font-size:.92rem;margin:12px 2px}
+.seg{display:flex;gap:8px;margin:0 0 6px;overflow-x:auto}
+.seg button{flex:none;white-space:nowrap;padding:12px 16px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:14px;font:inherit;font-weight:600}
+.seg button.on{background:var(--deep);color:#fff;border-color:var(--deep)}
+.zk{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px 18px;margin:0 0 12px;cursor:pointer}
+.zk p{font-family:"Noto Naskh Arabic","Droid Arabic Naskh",Amiri,serif;font-size:var(--fs);line-height:2;margin:0 0 8px}
+.zk p.q{color:var(--acc);font-weight:700}
+.zk.done{opacity:.5}
+.meta{display:flex;justify-content:space-between;align-items:center;color:var(--mut);font-size:.88rem}
+.ct{background:var(--gbg);color:var(--gold);padding:3px 14px;border-radius:99px;font-weight:700}
+h2{margin:6px 0 0;color:var(--acc)}h3{margin:22px 0 4px;color:var(--acc)}
+label{display:block;margin-top:14px;font-weight:600}
+select{width:100%;margin-top:6px;padding:12px;font:inherit;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink)}
+.ad{display:flex;align-items:center;gap:10px;padding:6px 0}.ad span{flex:1}
+.ad button{width:52px;height:46px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-size:1.2rem}
+.ad b{min-width:44px;text-align:center;direction:ltr}
+label.chk{display:flex;gap:10px;align-items:center}
+nav{position:fixed;inset:auto 0 0 0;display:flex;background:var(--card);border-top:1px solid var(--line);padding:6px 8px calc(6px + env(safe-area-inset-bottom))}
+nav button{flex:1;border:0;background:none;color:var(--mut);font:inherit;font-size:.8rem;padding:12px 2px;border-radius:12px}
+nav button.on{color:var(--acc);background:var(--gbg);font-weight:700}
+button:focus-visible,select:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+#ban{display:none;position:fixed;top:env(safe-area-inset-top);left:0;right:0;z-index:9;background:#8a6310;color:#fff;text-align:center;padding:16px;font-size:1.2rem;font-weight:700}
+#ban.show{display:block}
+.bt{display:block;margin:10px auto;padding:14px 28px;border:0;border-radius:14px;background:var(--deep);color:#fff;font:inherit;font-weight:700}summary{font-weight:700;cursor:pointer;color:var(--acc)}
+</style>
+</head>
+<body>
+<div id="ban"></div>
+<main id="v"></main>
+<nav><button data-t="p">الصلاة</button><button data-t="z">الأذكار</button><button data-t="q">القبلة</button><button data-t="j">التجويد</button><button data-t="h">أحاديث</button><button data-t="s">الإعدادات</button></nav>
+<script src="azkar.js"></script>
+<script src="tajweed.js"></script>
+<script src="qibla.js"></script>
+<script>
+const $=s=>document.querySelector(s);
+const PR=[['fajr','الفجر'],['sunrise','الشروق'],['dhuhr','الظهر'],['asr','العصر'],['maghrib','المغرب'],['isha','العشاء']],NM=Object.fromEntries(PR);
+const CITIES={baghdad:['بغداد',33.3152,44.3661],basra:['البصرة',30.5085,47.7835],mosul:['الموصل',36.3566,43.164],erbil:['أربيل',36.1901,44.0091],najaf:['النجف',32,44.3333],karbala:['كربلاء',32.6149,44.0242],kirkuk:['كركوك',35.4681,44.3922],sulaymaniyah:['السليمانية',35.5558,45.4351],nasiriyah:['الناصرية',31.0439,46.2576],amarah:['العمارة',31.836,47.144]};
+const M={mwl:['رابطة العالم الإسلامي',18,17,0],egypt:['الهيئة المصرية',19.5,17.5,0],makkah:['أم القرى',18.5,'90',0],jafari:['الجعفري',16,14,4]};
+/*CALC*/
+const rad=Math.PI/180,sin=a=>Math.sin(a*rad),cos=a=>Math.cos(a*rad),tan=a=>Math.tan(a*rad),asin=x=>Math.asin(x)/rad,acos=x=>Math.acos(x)/rad,atan2=(y,x)=>Math.atan2(y,x)/rad,acot=x=>Math.atan(1/x)/rad,fa=a=>((a%360)+360)%360,fh=a=>((a%24)+24)%24;
+function julian(y,m,d){if(m<=2){y--;m+=12}const A=Math.floor(y/100),B=2-A+Math.floor(A/4);return Math.floor(365.25*(y+4716))+Math.floor(30.6001*(m+1))+d+B-1524.5}
+function sunPos(j){const D=j-2451544.5,g=fa(357.529+0.98560028*D),q=fa(280.459+0.98564736*D),L=fa(q+1.915*sin(g)+0.02*sin(2*g)),e=23.439-3.6e-7*D,RA=atan2(cos(e)*sin(L),cos(L))/15;return{dec:asin(sin(e)*sin(L)),eq:q/15-fh(RA)}}
+function calc(date,lat,lng,mk,asrF){
+const tz=-date.getTimezoneOffset()/60,jd=julian(date.getFullYear(),date.getMonth()+1,date.getDate())-lng/360;
+const mid=t=>fh(12-sunPos(jd+t).eq);
+const ang=(a,t,ccw)=>{const dec=sunPos(jd+t).dec,v=(-sin(a)-sin(dec)*sin(lat))/(cos(dec)*cos(lat)),h=acos(Math.max(-1,Math.min(1,v)))/15;return mid(t)+(ccw?-h:h)};
+const m=M[mk],dec=t=>sunPos(jd+t).dec,r={fajr:ang(m[1],5/24,1),sunrise:ang(0.833,6/24,1),dhuhr:mid(.5),asr:ang(-acot(asrF+tan(Math.abs(lat-dec(13/24)))),13/24)};
+r.maghrib=m[3]?ang(m[3],.75):ang(0.833,.75);
+r.isha=typeof m[2]==='string'?r.maghrib+ +m[2]/60:ang(m[2],.75);
+for(const k in r)r[k]+=tz-lng/15;return r}
+/*END*/
+let S={city:'baghdad',lat:null,lng:null,m:'mwl',asr:1,adj:{fajr:0,sunrise:0,dhuhr:0,asr:0,maghrib:0,isha:0},fs:1.25,alert:true};
+try{Object.assign(S,JSON.parse(localStorage.getItem('st')||'{}'))}catch(e){}
+const save=()=>{try{localStorage.setItem('st',JSON.stringify(S))}catch(e){}};
+const loc=()=>S.city==='gps'&&S.lat!=null?['موقعي',S.lat,S.lng]:CITIES[S.city]||CITIES.baghdad;
+function day(d){const[,la,ln]=loc(),r=calc(d,la,ln,S.m,S.asr),o={};for(const[k]of PR)o[k]=Math.floor(r[k]*60+.5)+(S.adj[k]||0);return o}
+const f12=m=>{m=((m%1440)+1440)%1440;let h=Math.floor(m/60);const s=h>=12?'م':'ص';h=h%12||12;return h+':'+String(m%60).padStart(2,'0')+' '+s};
+const H=[
+{t:'مثل الذي يذكر ربه والذي لا يذكر ربه مثل الحي والميت',s:'رواه البخاري'},
+{t:'كلمتان خفيفتان على اللسان، ثقيلتان في الميزان، حبيبتان إلى الرحمن: سبحان الله وبحمده، سبحان الله العظيم',s:'متفق عليه'},
+{t:'من قال: سبحان الله وبحمده، في يوم مائة مرة، حطت خطاياه وإن كانت مثل زبد البحر',s:'متفق عليه'},
+{t:'أحب الكلام إلى الله أربع: سبحان الله، والحمد لله، ولا إله إلا الله، والله أكبر، لا يضرك بأيهن بدأت',s:'رواه مسلم'}];
+const V=$('#v');let tab='p',zk='m',fired='';
+const fmt=n=>n>0?'+'+n:''+n;
+function go(t){tab=t;document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));({p:pagP,z:pagZ,q:pagQ,j:pagJ,h:pagH,s:pagS})[t]();scrollTo(0,0)}
+function pagP(){V.innerHTML='<section class="hero"><div class="city" id="cy"></div><div class="lb">الصلاة القادمة</div><div class="nm" id="nm"></div><div class="cd" id="cd"></div><div class="tm" id="tm"></div></section><ul class="rows" id="rows"></ul><p class="foot">المواقيت محسوبة على جهازك بدون إنترنت. إذا اختلفت عن التقويم الذي تعتمده، عدّل الدقائق من الإعدادات.</p>';tick()}
+function pagZ(){const c=AZ[zk];V.innerHTML='<div class="seg">'+Object.entries(AZ).map(([k,v])=>`<button data-z="${k}" class="${zk===k?'on':''}">${v.n}</button>`).join('')+'</div><p class="hint">اضغط على الذكر ليعدّ التكرار. آيات القرآن تُضاف نصوصها من المصحف الموثوق في المرحلة القادمة.</p>'+c.l.map(a=>`<article class="zk" data-r="${a.n}" data-t="${a.n}"><p class="${a.q?'q':''}">${a.q?'من القرآن الكريم: '+a.q:a.t}</p><div class="meta"><small>${a.s||''}</small><span class="ct">${a.n>1?'× '+a.n:'مرة واحدة'}</span></div></article>`).join('')}
+function pagH(){V.innerHTML='<h2>أحاديث في فضل الذكر</h2><br>'+H.map(a=>`<article class="zk"><p>${a.t}</p><div class="meta"><small>${a.s}</small></div></article>`).join('')}
+function pagS(){const o=(ob,s)=>Object.entries(ob).map(([k,v])=>`<option value="${k}"${k===s?' selected':''}>${v[0]}</option>`).join('');
+V.innerHTML=`<h2>الإعدادات</h2>
+<label>المدينة<select id="c">${o(CITIES,S.city)}<option value="gps"${S.city==='gps'?' selected':''}>موقعي الحالي (GPS)</option></select></label>
+<label>طريقة الحساب<select id="m">${o(M,S.m)}</select></label>
+<label>العصر<select id="a"><option value="1"${S.asr==1?' selected':''}>شافعي / جمهور</option><option value="2"${S.asr==2?' selected':''}>حنفي</option></select></label>
+<h3>تعديل الدقائق</h3>${PR.map(([k,n])=>`<div class="ad"><span>${n}</span><button data-a="${k}" data-d="-1">−</button><b id="v${k}">${fmt(S.adj[k])}</b><button data-a="${k}" data-d="1">+</button></div>`).join('')}
+<h3>خط الأذكار</h3><div class="ad"><span>الحجم</span><button data-f="-.1">أ−</button><button data-f=".1">أ+</button></div>
+<label class="chk"><input type="checkbox" id="al"${S.alert?' checked':''}> تنبيه عند دخول الوقت (والتطبيق مفتوح)</label>
+<p class="foot">حساب المواقيت تقديري وقد يختلف دقيقة أو دقيقتين عن التقويم الرسمي. اختر الطريقة التي تعتمدها، وعدّل الدقائق عند الحاجة.</p>`}
+function tick(){const now=new Date(),t=day(now),cur=now.getHours()*60+now.getMinutes(),five=['fajr','dhuhr','asr','maghrib','isha'];
+const hit=five.find(k=>t[k]===cur&&now.getSeconds()<5);
+if(hit&&S.alert&&fired!==now.toDateString()+hit){fired=now.toDateString()+hit;const b=$('#ban');b.textContent='حان الآن وقت صلاة '+NM[hit];b.classList.add('show');navigator.vibrate&&navigator.vibrate([300,150,300]);setTimeout(()=>b.classList.remove('show'),60000)}
+if(tab!=='p')return;
+let nx=five.find(k=>t[k]>cur),tt=t,add=0;if(!nx){nx='fajr';tt=day(new Date(now.getTime()+864e5));add=1440}
+const s=(tt[nx]+add)*60-(cur*60+now.getSeconds()),p=n=>String(n).padStart(2,'0');
+$('#cy').textContent=loc()[0];$('#nm').textContent=NM[nx];$('#cd').textContent=p(Math.floor(s/3600))+':'+p(Math.floor(s%3600/60))+':'+p(s%60);$('#tm').textContent=f12(tt[nx]+add);
+$('#rows').innerHTML=PR.map(([k,n])=>`<li class="${k===nx&&!add?'cur':''}${k==='sunrise'?' sr':''}"><span>${n}</span><b>${f12(t[k])}</b></li>`).join('')}
+function gps(){navigator.geolocation?navigator.geolocation.getCurrentPosition(p=>{S.city='gps';S.lat=p.coords.latitude;S.lng=p.coords.longitude;save()},()=>alert('تعذّر تحديد الموقع. اختر مدينة من القائمة.')):alert('تحديد الموقع غير مدعوم')}
+V.addEventListener('click',e=>{const z=e.target.closest('.zk[data-t]');if(z){const t=+z.dataset.t;let r=+z.dataset.r;r=r>0?r-1:t;z.dataset.r=r;z.classList.toggle('done',r===0);z.querySelector('.ct').textContent=r===0?'تم':t>1?'× '+r:'مرة واحدة';return}
+const b=e.target.closest('button');if(!b)return;
+if(b.dataset.z){zk=b.dataset.z;pagZ()}
+else if(b.dataset.a){S.adj[b.dataset.a]=(S.adj[b.dataset.a]||0)+ +b.dataset.d;save();$('#v'+b.dataset.a).textContent=fmt(S.adj[b.dataset.a])}
+else if(b.dataset.f){S.fs=Math.min(2,Math.max(1,+(S.fs+ +b.dataset.f).toFixed(2)));save();document.documentElement.style.setProperty('--fs',S.fs+'rem')}});
+V.addEventListener('change',e=>{const i=e.target.id,v=e.target.value;if(i==='c'){v==='gps'?gps():(S.city=v,save())}else if(i==='m'){S.m=v;save()}else if(i==='a'){S.asr=+v;save()}else if(i==='al'){S.alert=e.target.checked;save()}});
+$('#ban').onclick=e=>e.target.classList.remove('show');
+document.querySelector('nav').onclick=e=>{const b=e.target.closest('button');b&&go(b.dataset.t)};
+document.documentElement.style.setProperty('--fs',S.fs+'rem');
+setInterval(tick,1000);go('p');
+if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('mizan-sw.js').catch(()=>{}));
+</script>
+</body>
+</html>
